@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>GitHub Repositories UI</title>
 <style>
   :root{
@@ -59,9 +59,21 @@
 <footer>Data from GitHub API</footer>
 
 <script>
-// === SETTINGS ===
-const username = "cindervoid";           // ← change to your GitHub username
-const excludedRepo = "cinder-ace"; // ← change to the repo you want hidden
+const username = "cindervoid"; // ← your GitHub username
+
+// Automatically detect this site's repo name from URL
+function detectRepoFromURL() {
+  try {
+    const host = window.location.hostname.toLowerCase();
+    const path = window.location.pathname.replace(/^\/|\/$/g, ""); // remove leading/trailing slashes
+    // Example: username.github.io/repo-name/ → "repo-name"
+    if (host.includes("github.io")) {
+      const segments = path.split("/");
+      return segments[0] || ""; // first segment after github.io
+    }
+    return "";
+  } catch { return ""; }
+}
 
 async function loadRepos() {
   const grid = document.getElementById("repoGrid");
@@ -71,8 +83,11 @@ async function loadRepos() {
     if (!res.ok) throw new Error("GitHub API rate limited or user not found");
     let data = await res.json();
 
-    // Filter out excluded repository
-    data = data.filter(repo => repo.name.toLowerCase() !== excludedRepo.toLowerCase());
+    // Exclude the repo this site is running from
+    const currentRepo = detectRepoFromURL();
+    if (currentRepo) {
+      data = data.filter(repo => repo.name.toLowerCase() !== currentRepo.toLowerCase());
+    }
 
     grid.innerHTML = "";
     data.forEach(repo=>{
@@ -94,7 +109,7 @@ async function loadRepos() {
     });
 
     if (data.length === 0) {
-      grid.innerHTML = `<p style="color:var(--muted)">No repositories found (after exclusion).</p>`;
+      grid.innerHTML = `<p style="color:var(--muted)">No repositories found (after self-exclusion).</p>`;
     }
   } catch (err) {
     grid.innerHTML = `<p style="color:var(--muted)">Error: ${err.message}</p>`;
