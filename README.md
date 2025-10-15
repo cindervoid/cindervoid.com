@@ -1,2 +1,1 @@
-# cindervoid.github.com
-a collection of all my projects, including arduino, gpt, and linux.
+NOTE that ALL projects in this repo are here for educational purposes.
