@@ -1,10 +1,251 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Hello, World!</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-      <h1>test</h1>
-  </body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>UI Element – Action Card</title>
+<style>
+  :root{
+    --bg: #0b0c10;
+    --panel: #111318;
+    --text: #e8eaf0;
+    --muted: #a7afc0;
+    --brand: #7c5cff;
+    --brand-2: #00d4ff;
+    --ok: #21d07a;
+    --ring: 0 0 0 3px rgba(124,92,255,.25);
+    --radius: 16px;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --border: 1px solid rgba(255,255,255,.08);
+    --glass: rgba(255,255,255,.04);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f5f6fb;
+      --panel:#ffffff;
+      --text:#111318;
+      --muted:#586074;
+      --brand:#6941ff;
+      --brand-2:#0ea5e9;
+      --ok:#16a34a;
+      --shadow:0 10px 30px rgba(17,19,24,.08);
+      --border:1px solid rgba(17,19,24,.08);
+      --glass:rgba(17,19,24,.04);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+    background:
+      radial-gradient(60rem 60rem at 10% -10%, rgba(124,92,255,.25), transparent 60%),
+      radial-gradient(60rem 60rem at 110% 20%, rgba(14,165,233,.25), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    display:grid; place-items:center; padding:2rem;
+  }
+
+  .card{
+    width:min(680px, 92vw);
+    background: linear-gradient(180deg, var(--panel), color-mix(in srgb, var(--panel) 85%, var(--glass)));
+    border:var(--border);
+    border-radius:var(--radius);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+    position:relative;
+    backdrop-filter: blur(6px);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    outline: none;
+  }
+  .card:focus-visible{ box-shadow: var(--shadow), var(--ring); }
+
+  .card::before{
+    content:"";
+    position:absolute; inset:-1px;
+    border-radius:calc(var(--radius) + 1px);
+    padding:1px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 60%, transparent), color-mix(in srgb, var(--brand-2) 60%, transparent));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    opacity:.35; pointer-events:none;
+  }
+
+  .card__header{
+    display:flex; gap:.9rem; align-items:flex-start;
+    padding:1.25rem 1.25rem 0;
+  }
+  .avatar{
+    width:44px; height:44px; border-radius:12px; flex:0 0 auto;
+    background: radial-gradient(circle at 30% 30%, var(--brand), var(--brand-2));
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.12);
+  }
+  .title{
+    display:flex; align-items:center; gap:.6rem; flex-wrap:wrap;
+  }
+  .title h2{
+    margin:0; font-size:1.05rem; font-weight:700; letter-spacing:.2px;
+  }
+  .badge{
+    font-size:.72rem; font-weight:600; color:var(--brand);
+    background: color-mix(in srgb, var(--brand) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand) 35%, transparent);
+    padding:.2rem .5rem; border-radius:999px;
+  }
+  .desc{
+    margin:.4rem 0 0; color:var(--muted);
+  }
+
+  .card__media{
+    margin:1rem 1.25rem 0; border-radius:14px; overflow:hidden; border: var(--border);
+    background:
+      linear-gradient(120deg, color-mix(in srgb, var(--brand) 18%, transparent), transparent 40%),
+      linear-gradient(300deg, color-mix(in srgb, var(--brand-2) 18%, transparent), transparent 40%),
+      repeating-linear-gradient(90deg, color-mix(in srgb, var(--glass) 60%, transparent) 0 2px, transparent 2px 4px);
+    height:150px; position:relative;
+  }
+  .spark{
+    position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(18rem 6rem at 10% 120%, rgba(255,255,255,.18), transparent 40%),
+      radial-gradient(10rem 8rem at 90% -30%, rgba(255,255,255,.14), transparent 40%);
+    mix-blend-mode: screen;
+  }
+
+  .progress{
+    display:flex; align-items:center; gap:.75rem;
+    padding:1rem 1.25rem 0;
+  }
+  .progress__bar{
+    position:relative; flex:1; height:10px; border-radius:999px;
+    background: color-mix(in srgb, var(--text) 10%, transparent);
+    overflow:hidden;
+  }
+  .progress__fill{
+    --val: 42;
+    position:absolute; inset:0 0 0 auto; width: calc(var(--val) * 1%); border-radius:999px;
+    background: linear-gradient(90deg, var(--brand) , var(--brand-2));
+    box-shadow: 0 0 20px color-mix(in srgb, var(--brand) 40%, transparent);
+    transition: width .5s ease;
+  }
+  .progress__label{
+    font-variant-numeric: tabular-nums; color:var(--muted); font-size:.85rem;
+    min-width:3ch; text-align:right;
+  }
+
+  .card__actions{
+    display:flex; justify-content:space-between; align-items:center;
+    gap:1rem; padding:1rem 1.25rem 1.25rem;
+  }
+  .actions__left{ display:flex; gap:.5rem; align-items:center; color:var(--muted); font-size:.9rem;}
+  .actions__left .dot{
+    width:8px; height:8px; border-radius:50%; background:var(--ok); box-shadow:0 0 10px color-mix(in srgb, var(--ok) 60%, transparent);
+  }
+
+  .btn{
+    --btn-bg: var(--brand);
+    --btn-fg: white;
+    --btn-ring: 0 0 0 6px color-mix(in srgb, var(--brand) 28%, transparent);
+    appearance:none; border:0; border-radius:12px; padding:.7rem 1rem; font-weight:700; cursor:pointer;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--btn-bg) 92%, black), var(--btn-bg));
+    color: var(--btn-fg);
+    box-shadow: 0 10px 20px color-mix(in srgb, var(--btn-bg) 25%, transparent);
+    transition: transform .08s ease, box-shadow .2s ease, opacity .2s ease;
+  }
+  .btn:hover{ transform: translateY(-1px); }
+  .btn:active{ transform: translateY(0); }
+  .btn:focus-visible{ outline:none; box-shadow: var(--btn-ring); }
+
+  .btn--ghost{
+    --btn-bg: color-mix(in srgb, var(--text) 8%, transparent);
+    --btn-fg: var(--text);
+    background: var(--btn-bg);
+    border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+    box-shadow: none; font-weight:600;
+  }
+
+  .row{ display:flex; gap:.6rem; align-items:center; flex-wrap:wrap;}
+  .sr-only{ position:absolute!important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<article class="card" role="region" aria-labelledby="card-title" tabindex="0">
+  <header class="card__header">
+    <div class="avatar" aria-hidden="true"></div>
+    <div>
+      <div class="title">
+        <h2 id="card-title">Build Preview</h2>
+        <span class="badge" aria-label="status: beta">BETA</span>
+      </div>
+      <p class="desc">A compact, reusable action card with progress, perfect for dashboards and modals.</p>
+    </div>
+  </header>
+
+  <div class="card__media" aria-hidden="true">
+    <div class="spark"></div>
+  </div>
+
+  <div class="progress" aria-label="Build progress">
+    <div class="progress__bar" aria-hidden="true">
+      <div class="progress__fill" id="progressFill" style="--val:42"></div>
+    </div>
+    <div class="progress__label" id="progressLabel" aria-live="polite">42%</div>
+  </div>
+
+  <div class="card__actions">
+    <div class="actions__left">
+      <span class="dot" aria-hidden="true"></span>
+      <span>All systems nominal</span>
+    </div>
+    <div class="row">
+      <button class="btn btn--ghost" type="button" id="btnLater">Later</button>
+      <button class="btn" type="button" id="btnRun">Run Action</button>
+    </div>
+  </div>
+</article>
+
+<script>
+  // Tiny demo JS: animates the progress and shows button hooks.
+  const fill = document.getElementById('progressFill');
+  const label = document.getElementById('progressLabel');
+  const run = document.getElementById('btnRun');
+  const later = document.getElementById('btnLater');
+
+  function setProgress(val){
+    const v = Math.max(0, Math.min(100, val|0));
+    fill.style.setProperty('--val', v);
+    label.textContent = v + '%';
+  }
+
+  let p = 42, dir = 1;
+  const tick = () => {
+    p += dir * 1;
+    if (p >= 96 || p <= 4) dir *= -1;
+    setProgress(p);
+    requestAnimationFrame(() => setTimeout(tick, 25));
+  };
+  tick();
+
+  run.addEventListener('click', () => {
+    // Hook your real action here
+    setProgress(100);
+    run.textContent = 'Running…';
+    run.disabled = true;
+    setTimeout(() => {
+      run.textContent = 'Done';
+      run.style.opacity = .9;
+    }, 800);
+  });
+
+  later.addEventListener('click', () => {
+    // Example "dismiss" interaction
+    document.querySelector('.card').style.transform = 'scale(.985)';
+    document.querySelector('.card').style.opacity = .92;
+    setTimeout(() => {
+      document.querySelector('.card').style.transform = '';
+      document.querySelector('.card').style.opacity = '';
+    }, 220);
+  });
+</script>
+</body>
 </html>
